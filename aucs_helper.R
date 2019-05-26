@@ -64,6 +64,33 @@ are_same_community <- function(cid_value, actor_source_value,actor_target_value)
 
 }
 
+get_dataframe_Pi <- function(cid_value,P){
+    Pc <- data.frame (
+                actor_source=character(),
+                actor_target=character(),
+                cid=integer(),
+                stringsAsFactors=FALSE
+            )
+
+        for (i in 1:nrow(P)){
+            row <- P[i,]
+            actor_source_value <- as.character(row["actor_source"][[1]])
+            actor_target_value <- as.character(row["actor_target"][[1]])
+            flag = are_same_community(as.integer(cid_value),actor_source_value,actor_target_value)
+
+            if (flag) {
+                    single_dataframe <-data.frame( 
+                    actor_source = actor_source_value,
+                    actor_target = actor_target_value,
+                    cid = cid_value
+                )
+                Pc = rbind(Pc, single_dataframe)
+            }
+    }
+    Pc <- unique(Pc)
+    Pc
+}
+
 get_dataframe_Pc <- function(P){
     Pc <- data.frame (
                 actor_source=character(),
@@ -93,4 +120,115 @@ get_dataframe_Pc <- function(P){
     }
     Pc <- unique(Pc)
     Pc
+}
+
+get_mcd_cidc <- function (cid_value) {
+
+    edge <- data.frame (
+        actor_source=character(),
+        actor_target=character(),
+        stringsAsFactors=FALSE
+    )
+    actors <- subset(aucs_com, cid == cid_value)
+    actors_col <- unique(actors["actor"])
+    
+    for(i in 1:nrow(actors_col)){
+        actor_value = as.character(actors_col[i,] ) 
+
+        targets = subset(aucs_df, from_actor == actor_value | to_actor == actor_value)
+        
+        targets = unique(targets)
+
+        target_list = get_target(cid_value,actor_value,targets)
+        
+        for(j in 1:nrow(target_list)){
+
+            target_value = as.character(target_list[i,][[1]])
+            single_dataframe <-data.frame( 
+                    actor_source = actor_value,
+                    actor_target = target_value
+                )
+                edge = rbind(edge, single_dataframe)
+        }
+            # print(paste("triade avec le noeud ",source," vaut : ",triade_cid))
+
+        }
+    edge_count = nrow(unique(edge))
+    actors_count_cidi = nrow(unique(actors["actor"]))
+    max_edge = ncol(combn(actors_count_cidi,2))
+
+    mcd_cidi = edge_count / (D_count * max_edge)
+
+    mcd_cidi
+}
+
+get_triade_cidc <- function (cid_value) {
+    triade_cid = 0
+    actors <- subset(aucs_com, cid == cid_value)
+    actors_col <- unique(actors["actor"])
+
+    for(i in 1:nrow(actors_col)){
+        actor_value = as.character(actors_col[i,] ) 
+
+        targets = subset(aucs_df, from_actor == actor_value | to_actor == actor_value)
+        
+        targets = unique(targets)
+
+        target_list = get_target(cid_value,actor_value,targets)
+        
+        for(j in 1:nrow(target_list)){
+
+            source = as.character(target_list[i,][[1]])
+
+            for(k in 1:nrow(target_list)){
+                target = as.character(target_list[k,][[1]])
+                count = 0
+                
+                if(!is.na(target != source))
+                if(target != source){
+                   
+                   count = nrow(
+                        subset(
+                            aucs_df, 
+                            to_actor==source & from_actor == target |
+                            to_actor == target & from_actor == source
+                        )
+                    )
+                }
+                if(count > 0){
+                    triade_cid = triade_cid + 1
+                    
+                }
+            }
+            # print(paste("triade avec le noeud ",source," vaut : ",triade_cid))
+
+        }
+    }
+    triade_cid
+}
+
+get_target <- function(cid_value,actor_value,list){
+    edge <- data.frame (
+        neighbor=character(),
+        stringsAsFactors=FALSE
+    )
+    for(i in 1:nrow(list)){
+        actor_target = NA
+        row = list[i,]
+        if(actor_value == row["to_actor"])
+            actor_target = as.character(row["from_actor"][[1]])
+        else
+            actor_target = as.character(row["to_actor"][[1]])
+
+        single_dataframe <-data.frame( 
+                neighbor = actor_target
+            )
+
+            if(!is.na(actor_target)){
+                edge = rbind(edge, single_dataframe)
+            }
+    }
+    edge = unique(edge)
+    edge
+
 }
