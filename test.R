@@ -156,4 +156,4 @@ print(paste ("mcd = " ,mcd))
 #           Triade (Multi-community Density)                    #
 #---------------------------------------------------------------#
 
-print(paste("Triade : ",get_triade_cidc(3)))
+print(paste("Triade : ",get_triade_cidc(0)))

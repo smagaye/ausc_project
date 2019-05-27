@@ -143,21 +143,30 @@ get_mcd_cidc <- function (cid_value) {
         
         for(j in 1:nrow(target_list)){
 
-            target_value = as.character(target_list[i,][[1]])
+            target_value = as.character(target_list[j,][[1]])
             single_dataframe <-data.frame( 
                     actor_source = actor_value,
                     actor_target = target_value
                 )
                 edge = rbind(edge, single_dataframe)
         }
-            # print(paste("triade avec le noeud ",source," vaut : ",triade_cid))
 
         }
+
+    for(a in 1:nrow(edge)){
+        row_edge = edge[a,]
+        source = as.character(row_edge["actor_source"][[1]])
+        target = as.character(row_edge["actor_target"][[1]])
+        edge$actor_source[edge$actor_source == target & edge$actor_target == source] <- NA
+        edge$actor_target[ is.na(edge$actor_source) & edge$actor_target == source] <- NA
+    }
+    edge<-edge[!(is.na(edge$actor_source) & is.na(edge$actor_target)),]
+    df_k = nrow(unique(actors["layer"]))
     edge_count = nrow(unique(edge))
     actors_count_cidi = nrow(unique(actors["actor"]))
     max_edge = ncol(combn(actors_count_cidi,2))
 
-    mcd_cidi = edge_count / (D_count * max_edge)
+    mcd_cidi = edge_count / (df_k * max_edge)
 
     mcd_cidi
 }
@@ -178,7 +187,7 @@ get_triade_cidc <- function (cid_value) {
         
         for(j in 1:nrow(target_list)){
 
-            source = as.character(target_list[i,][[1]])
+            source = as.character(target_list[j,][[1]])
 
             for(k in 1:nrow(target_list)){
                 target = as.character(target_list[k,][[1]])
