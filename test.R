@@ -156,4 +156,18 @@ print(paste ("mcd = " ,mcd))
 #           Triade (Multi-community Density)                    #
 #---------------------------------------------------------------#
 
-print(paste("Triade : ",get_triade_cidc(0)))
+triade = 0
+for(i in 1:nrow(cids)){
+    actors <- subset(aucs_com, cid == i-1)
+    actors_col <- unique(actors["actor"])
+    nc = nrow(actors_col)
+    ndim =nrow(unique(actors["layer"]))
+    triade_cidi = get_triade_cidc(i-1)
+    denominateur = ndim * ncol(combn(nc,3))
+    delta_c = triade_cidi /denominateur
+    print(paste("Triade_cid ",i-1," : ",delta_c))
+    triade = triade + (delta_c)/nrow(cids)
+    
+}
+
+print(paste("Triade = ",triade))

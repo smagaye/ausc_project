@@ -172,6 +172,14 @@ get_mcd_cidc <- function (cid_value) {
 }
 
 get_triade_cidc <- function (cid_value) {
+
+    triade <- data.frame (
+        source =character(),
+        neighbor1=character(),
+        neighbor2=character(),
+        stringsAsFactors=FALSE
+    )
+
     triade_cid = 0
     actors <- subset(aucs_com, cid == cid_value)
     actors_col <- unique(actors["actor"])
@@ -205,15 +213,41 @@ get_triade_cidc <- function (cid_value) {
                     )
                 }
                 if(count > 0){
-                    triade_cid = triade_cid + 1
-                    
+                        single_dataframe <- data.frame (
+                            source = actor_value,
+                            neighbor1=source,
+                            neighbor2=target
+                        )
+                    triade = rbind(triade,single_dataframe)
                 }
             }
             # print(paste("triade avec le noeud ",source," vaut : ",triade_cid))
 
         }
     }
-    triade_cid
+
+    triade = unique(triade)
+    for(a in 1:nrow(triade)){
+        row_triade = triade[a,]
+        source = as.character(row_triade["source"][[1]])
+        neighbor1 = as.character(row_triade["neighbor1"][[1]])
+        neighbor2 = as.character(row_triade["neighbor2"][[1]])
+
+        triade$source[
+            triade$source == source & triade$neighbor1 == neighbor2 & triade$neighbor2 == neighbor1 |
+            triade$source == neighbor1 & triade$neighbor1 == source & triade$neighbor2 == neighbor2 |
+            triade$source == neighbor1 & triade$neighbor1 == neighbor2 & triade$neighbor2 == source |
+            triade$source == neighbor2 & triade$neighbor1 == source & triade$neighbor2 == neighbor1 |
+            triade$source == neighbor2 & triade$neighbor1 == neighbor1 & triade$neighbor2 == source 
+
+        ]<- NA
+    }
+
+    triade<-triade[!(is.na(triade$source)),]
+    # triade = unique(subset(triade,!is.na(triade$source)))
+    # print(triade)
+    triade_cid = nrow(triade)
+
 }
 
 get_target <- function(cid_value,actor_value,list){
