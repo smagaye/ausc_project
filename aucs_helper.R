@@ -122,6 +122,32 @@ get_dataframe_Pc <- function(P){
     Pc
 }
 
+get_target <- function(cid_value,actor_value,list){
+    edge <- data.frame (
+        neighbor=character(),
+        stringsAsFactors=FALSE
+    )
+    for(i in 1:nrow(list)){
+        actor_target = NA
+        row = list[i,]
+        if(actor_value == row["to_actor"])
+            actor_target = as.character(row["from_actor"][[1]])
+        else
+            actor_target = as.character(row["to_actor"][[1]])
+
+        single_dataframe <-data.frame( 
+                neighbor = actor_target
+            )
+
+            if(!is.na(actor_target)){
+                edge = rbind(edge, single_dataframe)
+            }
+    }
+    edge = unique(edge)
+    edge
+
+}
+
 get_mcd_cidc <- function (cid_value) {
 
     edge <- data.frame (
@@ -250,28 +276,28 @@ get_triade_cidc <- function (cid_value) {
 
 }
 
-get_target <- function(cid_value,actor_value,list){
-    edge <- data.frame (
-        neighbor=character(),
-        stringsAsFactors=FALSE
-    )
-    for(i in 1:nrow(list)){
-        actor_target = NA
-        row = list[i,]
-        if(actor_value == row["to_actor"])
-            actor_target = as.character(row["from_actor"][[1]])
-        else
-            actor_target = as.character(row["to_actor"][[1]])
+get_rmc_cidc <- function(cid_value){
+    rmc_cidi = 0
+    com_cidi  <- subset(aucs_com, cid == cid_value)
+    layers_cidi <- com_cidi["layer"]
+    layers_distint_cidi = unique(layers_cidi)
+    ndim = nrow(layers_distint_cidi)
+    moyenne = nrow(layers_cidi)/ndim
+    nc = nrow(unique(com_cidi["actor"]))
 
-        single_dataframe <-data.frame( 
-                neighbor = actor_target
-            )
+    actor_dk = NA
+    for(i in 1:ndim){
+        occurence_value = as.character(layers_distint_cidi[i,][[1]])
+        dimension_count = count_occurence_in_column(occurence_value,layers_cidi)
+        if(moyenne<dimension_count){
+            actor_dk_row <- subset(com_cidi,layer== occurence_value)
+            actor_dk <- rbind(actor_dk,actor_dk_row)
+        }
 
-            if(!is.na(actor_target)){
-                edge = rbind(edge, single_dataframe)
-            }
     }
-    edge = unique(edge)
-    edge
+    actor_dk<-actor_dk[!(is.na(actor_dk$actor)),]
 
+    node_dk_count = nrow(unique(actor_dk["actor"]))
+    rmc_cidi = node_dk_count/(ndim * nc)
+    rmc_cidi
 }
