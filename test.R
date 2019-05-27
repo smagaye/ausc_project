@@ -163,11 +163,29 @@ for(i in 1:nrow(cids)){
     nc = nrow(actors_col)
     ndim =nrow(unique(actors["layer"]))
     triade_cidi = get_triade_cidc(i-1)
+
     denominateur = ndim * ncol(combn(nc,3))
     delta_c = triade_cidi /denominateur
-    print(paste("Triade_cid ",i-1," : ",delta_c))
+    print(paste("Triade_cid ",i-1,"  = ",delta_c))
     triade = triade + (delta_c)/nrow(cids)
     
 }
 
 print(paste("Triade = ",triade))
+
+#---------------------------------------------------------------#
+#           RMC (Multi-community Density)                       #
+#---------------------------------------------------------------#
+rmc = 0
+for(i in 1:nrow(cids)){
+    rmc_cdi = get_rmc_cidc(i-1)
+    rmc = rmc + rmc_cdi/nrow(cids)
+    print(paste("rmc_cdi ",i-1,"  = ",rmc_cdi))
+
+}
+
+print(paste("RMC Dense = ",rmc))
+
+
+
+
