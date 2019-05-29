@@ -21,7 +21,9 @@ Pc <- get_dataframe_Pc(P)
 print(paste ("Pc = " ,nrow(unique(Pc)))) 
 
 # Détermination de P2
-P2 <- subset(dataframe_intregrated, layer_count_for_target >=2)
+P2 <- subset(dataframe_intregrated, layer_count_for_target >=1)
+# write.csv(dataframe_intregrated,"dataframe_aucs_integration.csv", row.names = FALSE)
+
 print(paste("P2 = ",nrow(P2)))
 
 
