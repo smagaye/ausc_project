@@ -1,9 +1,11 @@
 #!/usr/bin/Rscript
 
 # Chagement du jeu de données
-aucs_com = read.csv("aucs_com_gLouv.csv", header = TRUE)
-aucs_df = read.csv("aucs_df.csv", header = TRUE)
+# aucs_com = read.csv("aucs_com_gLouv.csv", header = TRUE)
+# aucs_df = read.csv("aucs_df.csv", header = TRUE)
 
+aucs_com = read.csv("data/florent_com.csv", header = TRUE)
+aucs_df = read.csv("data/florent_df.csv", header = TRUE)
 init<-function(dataframe,dataframe_comp) {
     aucs_com <- dataframe
     aucs_df <- dataframe_comp
@@ -122,7 +124,7 @@ get_dataframe_Pc <- function(P){
     Pc
 }
 
-get_target <- function(cid_value,actor_value,list){
+get_target <- function(actor_value,list){
     edge <- data.frame (
         neighbor=character(),
         stringsAsFactors=FALSE
@@ -148,6 +150,33 @@ get_target <- function(cid_value,actor_value,list){
 
 }
 
+get_target_by_cid_value <- function(cid_value,actor_value,list){
+    edge <- data.frame (
+        neighbor=character(),
+        stringsAsFactors=FALSE
+    )
+    for(i in 1:nrow(list)){
+        actor_target = NA
+        row = list[i,]
+        if(actor_value == row["to_actor"])
+            actor_target = as.character(row["from_actor"][[1]])
+        else
+            actor_target = as.character(row["to_actor"][[1]])
+
+        count_item = nrow(unique(subset(aucs_com, actor==actor_target & cid ==cid_value)))
+
+        if(!is.na(actor_target) & count_item >0){
+            single_dataframe <-data.frame( 
+                neighbor = actor_target
+            )
+                edge = rbind(edge, single_dataframe)
+            }
+    }
+    edge = unique(edge)
+    edge
+
+}
+
 get_mcd_cidc <- function (cid_value) {
 
     edge <- data.frame (
@@ -165,7 +194,7 @@ get_mcd_cidc <- function (cid_value) {
         
         targets = unique(targets)
 
-        target_list = get_target(cid_value,actor_value,targets)
+        target_list = get_target_by_cid_value(cid_value,actor_value,targets)
         
         for(j in 1:nrow(target_list)){
 
@@ -178,6 +207,7 @@ get_mcd_cidc <- function (cid_value) {
         }
 
         }
+        
 
     for(a in 1:nrow(edge)){
         row_edge = edge[a,]
@@ -188,6 +218,7 @@ get_mcd_cidc <- function (cid_value) {
     }
     edge<-edge[!(is.na(edge$actor_source) & is.na(edge$actor_target)),]
     df_k = nrow(unique(actors["layer"]))
+
     edge_count = nrow(unique(edge))
     actors_count_cidi = nrow(unique(actors["actor"]))
     max_edge = ncol(combn(actors_count_cidi,2))
@@ -217,7 +248,7 @@ get_triade_cidc <- function (cid_value) {
         
         targets = unique(targets)
 
-        target_list = get_target(cid_value,actor_value,targets)
+        target_list = get_target_by_cid_value(cid_value,actor_value,targets)
         
         for(j in 1:nrow(target_list)){
 
@@ -289,13 +320,13 @@ get_rmc_cidc <- function(cid_value){
     for(i in 1:ndim){
         occurence_value = as.character(layers_distint_cidi[i,][[1]])
         dimension_count = count_occurence_in_column(occurence_value,layers_cidi)
-        if(moyenne<dimension_count){
+        # print(paste("Ocurrence value = ",occurence_value,"dimension_count = ",dimension_count," moyenne = ",moyenne))
+        if(moyenne<=dimension_count){
             actor_dk_row <- subset(com_cidi,layer== occurence_value)
-            actor_dk <- rbind(actor_dk,actor_dk_row)
+            actor_dk <- rbind(na.omit(actor_dk),actor_dk_row)
         }
 
     }
-    actor_dk<-actor_dk[!(is.na(actor_dk$actor)),]
 
     node_dk_count = nrow(unique(actor_dk["actor"]))
     rmc_cidi = node_dk_count/(ndim * nc)

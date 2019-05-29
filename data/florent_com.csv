@@ -1,0 +1,17 @@
+actor,layer,cid
+Barbadori,business,0
+Bischeri,business,0
+Lamberteschi,business,0
+Castellani,business,0
+Guadagni,business,0
+Peruzzi,business,0
+Strozzi,marriage,1
+Bischeri,marriage,1
+Castellani,marriage,1
+Peruzzi,marriage,1
+Barbadori,business,2
+Ginori,business,2
+Medici,business,2
+Tornabuoni,marriage,3
+Medici,marriage,3
+Ridolfi,marriage,3
